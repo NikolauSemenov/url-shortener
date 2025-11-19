@@ -1,0 +1,14 @@
+.idea
+.vscode
+
+# dist
+.env
+dist/
+sdist/
+lib/
+lib64/
+*.egg
+*.egg-info
+
+.DS_Store
+
