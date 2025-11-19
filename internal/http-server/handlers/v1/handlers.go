@@ -1,9 +1,11 @@
 package v1
 
 import (
+	"errors"
 	"log/slog"
 	"net/http"
 	"url-shortener/internal/http-server/handlers/model"
+	"url-shortener/internal/lib/api/errorsApp"
 	resp "url-shortener/internal/lib/api/response"
 	"url-shortener/internal/services"
 
@@ -31,7 +33,7 @@ func NewHTTPHandlers(log *slog.Logger, svc services.URLService) *HTTPHandlers {
 // @Failure 400 {string} string "Некорректный JSON"
 // @Failure 422 {string} string "Ошибка валидации запроса"
 // @Failure 500 {string} string "Ошибка сохранения URL"
-// @Router /url/save [post]
+// @Router /api/v1/url/save [post]
 func (h *HTTPHandlers) SaveHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logger := h.log.With(
@@ -56,6 +58,11 @@ func (h *HTTPHandlers) SaveHandler() http.HandlerFunc {
 
 		alias, err := h.svc.SaveURL(req.URL, req.Alias)
 		if err != nil {
+			if errors.Is(err, errorsApp.ErrUrlAlreadyExists) {
+				render.Status(r, http.StatusConflict)
+				render.JSON(w, r, "url already exists")
+				return
+			}
 			logger.Error("failed to save url", "error", err)
 			render.Status(r, http.StatusInternalServerError)
 			render.JSON(w, r, "cannot save url")
@@ -78,7 +85,7 @@ func (h *HTTPHandlers) SaveHandler() http.HandlerFunc {
 // @Success 204 "URL успешно удалён"
 // @Failure 422 {string} string "Alias не указан"
 // @Failure 500 {string} string "Ошибка удаления URL"
-// @Router /url/{alias} [delete]
+// @Router /api/v1/url/{alias} [delete]
 func (h *HTTPHandlers) DeleteHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logger := h.log.With(
@@ -109,7 +116,7 @@ func (h *HTTPHandlers) DeleteHandler() http.HandlerFunc {
 // @Tags URL
 // @Param alias path string true "Alias для редиректа"
 // @Success 302 {string} string "Redirected to original URL"
-// @Router /{alias} [get]
+// @Router /api/v1/{alias} [get]
 func (h *HTTPHandlers) RedirectHandler() http.HandlerFunc {
 	return func(w http.ResponseWriter, r *http.Request) {
 		logger := h.log.With(

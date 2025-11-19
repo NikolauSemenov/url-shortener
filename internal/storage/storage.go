@@ -11,6 +11,7 @@ type DbStore interface {
 	SaveURL(urlToSave string, alias string) error
 	GetURL(alias string) (string, error)
 	DeleteURL(alias string) error
+	CheckExistsUrl(alias, urlToSave string) error
 	Close()
 }
 

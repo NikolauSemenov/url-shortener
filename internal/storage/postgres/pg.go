@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"time"
+	"url-shortener/internal/lib/api/errorsApp"
 
 	"github.com/jackc/pgx/v4"
 	"github.com/jackc/pgx/v5/pgxpool"
@@ -71,4 +72,15 @@ func (s *StoragePG) DeleteURL(alias string) error {
 		return err
 	}
 	return nil
+}
+
+func (s *StoragePG) CheckExistsUrl(alias, url string) error {
+	ctx, cancel := context.WithTimeout(context.Background(), 3*time.Second)
+	defer cancel()
+	var aliasDb string
+	query := `SELECT alias FROM urls WHERE alias = $1 AND original_url = $2`
+	if err := s.db.QueryRow(ctx, query, alias, url).Scan(&aliasDb); err != nil {
+		return err
+	}
+	return errorsApp.ErrUrlAlreadyExists
 }

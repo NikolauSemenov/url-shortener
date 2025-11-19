@@ -11,11 +11,12 @@ import (
 	"syscall"
 	"time"
 	"url-shortener/internal/config"
-	"url-shortener/internal/http-server/handlers"
 	v1 "url-shortener/internal/http-server/handlers/v1"
 	"url-shortener/internal/services"
 	"url-shortener/internal/storage"
 	"url-shortener/internal/storage/cache"
+
+	"github.com/go-chi/chi/v5"
 )
 
 const (
@@ -52,7 +53,9 @@ func NewApp() (*App, error) {
 	srv := services.New(store, configApp, cacheClient, log)
 
 	handlerGroupV1 := v1.NewHTTPHandlers(log, srv.URL)
-	router := handlers.RegisterRoutes(log, handlerGroupV1)
+
+	router := chi.NewRouter()
+	v1.RegisterRoutes(log, router, handlerGroupV1)
 	return &App{
 		web: &http.Server{
 			Addr:         configApp.Address,

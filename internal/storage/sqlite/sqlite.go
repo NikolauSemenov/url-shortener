@@ -3,6 +3,7 @@ package sqlite
 import (
 	"database/sql"
 	"fmt"
+	"url-shortener/internal/lib/api/errorsApp"
 
 	_ "github.com/mattn/go-sqlite3" // init sqlite3 driver
 )
@@ -71,4 +72,17 @@ func (s *StorageSqlite) DeleteURL(alias string) error {
 	}
 	return nil
 
+}
+
+func (s *StorageSqlite) CheckExistsUrl(alias, urlToSave string) error {
+	const op = "storage.sqlite.CheckExistsUrl"
+	stmt, err := s.db.Prepare("SELECT alias FROM url WHERE alias = ? and original_url = ?")
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+	err = stmt.QueryRow(alias, urlToSave).Err()
+	if err != nil {
+		return fmt.Errorf("%s: %w", op, err)
+	}
+	return errorsApp.ErrUrlAlreadyExists
 }

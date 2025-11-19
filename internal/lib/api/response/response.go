@@ -6,18 +6,11 @@ type Response struct {
 }
 
 const (
-	StatusOK    = "OK"
-	StatusError = "ERROR"
+	StatusOK = "OK"
 )
 
 func OK() Response {
 	return Response{
 		Status: StatusOK,
-	}
-}
-
-func Error(msg string) Response {
-	return Response{
-		Status: StatusError,
 	}
 }

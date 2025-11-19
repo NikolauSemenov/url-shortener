@@ -15,7 +15,7 @@ const docTemplate = `{
     "host": "{{.Host}}",
     "basePath": "{{.BasePath}}",
     "paths": {
-        "/url/save": {
+        "/api/v1/url/save": {
             "post": {
                 "description": "Сохраняет оригинальный URL и возвращает alias. Если alias не передан, генерируется случайный.",
                 "tags": [
@@ -61,7 +61,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/url/{alias}": {
+        "/api/v1/url/{alias}": {
             "delete": {
                 "description": "Удаляет URL по alias. Возвращает статус 204 No Content в случае успеха.",
                 "tags": [
@@ -96,7 +96,7 @@ const docTemplate = `{
                 }
             }
         },
-        "/{alias}": {
+        "/api/v1/{alias}": {
             "get": {
                 "description": "Получает alias из URL, ищет соответствующий оригинальный URL и выполняет редирект (HTTP 302).",
                 "tags": [

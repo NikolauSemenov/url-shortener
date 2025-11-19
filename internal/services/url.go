@@ -1,8 +1,10 @@
 package services
 
 import (
+	"errors"
 	"log/slog"
 	"url-shortener/internal/config"
+	"url-shortener/internal/lib/api/errorsApp"
 	"url-shortener/internal/lib/random"
 	"url-shortener/internal/storage"
 	"url-shortener/internal/storage/cache"
@@ -22,6 +24,10 @@ func NewProcessingURL(repo storage.DbStore, cfg *config.Config, cacheClient cach
 func (s *ProcessingURL) SaveURL(urlToSave, alias string) (string, error) {
 	if alias == "" {
 		alias = random.NewRandomString(s.cfg.HTTPServer.AliasLength)
+	} else {
+		if err := s.repo.CheckExistsUrl(alias, urlToSave); err != nil && errors.Is(err, errorsApp.ErrUrlAlreadyExists) {
+			return "", errorsApp.ErrUrlAlreadyExists
+		}
 	}
 	err := s.repo.SaveURL(urlToSave, alias)
 	if err != nil {
