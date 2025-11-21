@@ -33,11 +33,6 @@ func (s *ProcessingURL) SaveURL(urlToSave, alias string) (string, error) {
 	if err != nil {
 		return "", err
 	}
-
-	err = s.cacheClient.Set(alias, urlToSave, s.cfg.CacheTTL)
-	if err != nil {
-		s.log.Error("failed to create cache url", "alias", alias, "err", err)
-	}
 	return alias, nil
 }
 
@@ -51,8 +46,18 @@ func (s *ProcessingURL) DeleteURL(alias string) error {
 
 func (s *ProcessingURL) Redirect(alias string) (string, error) {
 	data, err := s.cacheClient.Get(alias)
-	if err == nil {
-		return data, nil
+	if err != nil {
+		if errors.Is(err, errorsApp.ErrCacheMiss) {
+			val, errRep := s.repo.GetURL(alias)
+			if errRep != nil {
+				return "", errRep
+			}
+			err = s.cacheClient.Set(alias, val, s.cfg.CacheTTL)
+			if err != nil {
+				s.log.Error("failed to create cache url", "alias", alias, "err", err)
+			}
+			return val, nil
+		}
 	}
-	return s.repo.GetURL(alias)
+	return data, nil
 }

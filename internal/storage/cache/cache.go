@@ -2,9 +2,11 @@ package cache
 
 import (
 	"context"
+	"errors"
 	"log"
 	"time"
 	"url-shortener/internal/config"
+	"url-shortener/internal/lib/api/errorsApp"
 
 	"github.com/redis/go-redis/v9"
 )
@@ -33,7 +35,13 @@ func NewCache(cfg *config.CacheConfig) (*RedisCache, error) {
 }
 
 func (r *RedisCache) Get(key string) (string, error) {
-	return r.redis.Get(r.ctx, key).Result()
+	val, err := r.redis.Get(r.ctx, key).Result()
+	if err != nil {
+		if errors.Is(err, redis.Nil) {
+			return "", errorsApp.ErrCacheMiss
+		}
+	}
+	return val, nil
 }
 
 func (r *RedisCache) Set(key string, value string, ttl time.Duration) error {
