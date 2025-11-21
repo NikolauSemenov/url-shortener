@@ -7,6 +7,7 @@ import (
 	"url-shortener/internal/http-server/handlers/model"
 	"url-shortener/internal/lib/api/errorsApp"
 	resp "url-shortener/internal/lib/api/response"
+	"url-shortener/internal/ports"
 	"url-shortener/internal/services"
 
 	"github.com/go-chi/chi/v5"
@@ -16,11 +17,11 @@ import (
 )
 
 type HTTPHandlers struct {
-	log *slog.Logger
+	log ports.Logger
 	svc services.URLService
 }
 
-func NewHTTPHandlers(log *slog.Logger, svc services.URLService) *HTTPHandlers {
+func NewHTTPHandlers(log ports.Logger, svc services.URLService) *HTTPHandlers {
 	return &HTTPHandlers{log: log, svc: svc}
 }
 

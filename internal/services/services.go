@@ -1,8 +1,8 @@
 package services
 
 import (
-	"log/slog"
 	"url-shortener/internal/config"
+	"url-shortener/internal/ports"
 	"url-shortener/internal/storage"
 	"url-shortener/internal/storage/cache"
 )
@@ -15,10 +15,10 @@ type URLService interface {
 
 type Services struct {
 	URL URLService
-	log *slog.Logger
+	log *ports.Logger
 }
 
-func New(store storage.DbStore, cfg *config.Config, cacheClient cache.Cache, log *slog.Logger) *Services {
+func New(store storage.DbStore, cfg *config.Config, cacheClient cache.Cache, log ports.Logger) *Services {
 	return &Services{
 		URL: NewProcessingURL(store, cfg, cacheClient, log),
 	}

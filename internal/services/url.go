@@ -2,10 +2,10 @@ package services
 
 import (
 	"errors"
-	"log/slog"
 	"url-shortener/internal/config"
 	"url-shortener/internal/lib/api/errorsApp"
 	"url-shortener/internal/lib/random"
+	"url-shortener/internal/ports"
 	"url-shortener/internal/storage"
 	"url-shortener/internal/storage/cache"
 )
@@ -14,10 +14,10 @@ type ProcessingURL struct {
 	repo        storage.DbStore
 	cfg         *config.Config
 	cacheClient cache.Cache
-	log         *slog.Logger
+	log         ports.Logger
 }
 
-func NewProcessingURL(repo storage.DbStore, cfg *config.Config, cacheClient cache.Cache, log *slog.Logger) *ProcessingURL {
+func NewProcessingURL(repo storage.DbStore, cfg *config.Config, cacheClient cache.Cache, log ports.Logger) *ProcessingURL {
 	return &ProcessingURL{repo: repo, cfg: cfg, cacheClient: cacheClient, log: log}
 }
 

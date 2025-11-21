@@ -4,7 +4,6 @@ import (
 	"context"
 	"errors"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"os"
 	"os/signal"
@@ -12,6 +11,8 @@ import (
 	"time"
 	"url-shortener/internal/config"
 	v1 "url-shortener/internal/http-server/handlers/v1"
+	"url-shortener/internal/infrastructure/logger"
+	"url-shortener/internal/ports"
 	"url-shortener/internal/services"
 	"url-shortener/internal/storage"
 	"url-shortener/internal/storage/cache"
@@ -19,17 +20,11 @@ import (
 	"github.com/go-chi/chi/v5"
 )
 
-const (
-	envLocal = "local"
-	envDev   = "dev"
-	envProd  = "prod"
-)
-
 type App struct {
 	web       *http.Server
 	configApp *config.Config
 	store     storage.DbStore
-	log       *slog.Logger
+	log       ports.Logger
 }
 
 func NewApp() (*App, error) {
@@ -38,7 +33,7 @@ func NewApp() (*App, error) {
 		return nil, errors.New("configApp is nil")
 	}
 
-	log := setupLogger(configApp.Env)
+	log := logger.NewLogger(configApp.Env)
 
 	store, err := storage.NewStorage(configApp)
 	if err != nil {
@@ -97,24 +92,4 @@ func (a *App) Stop() error {
 	}
 	a.store.Close()
 	return nil
-}
-
-func setupLogger(env string) *slog.Logger {
-	var log *slog.Logger
-
-	switch env {
-	case envLocal:
-		log = slog.New(
-			slog.NewTextHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-		)
-	case envDev:
-		log = slog.New(
-			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelDebug}),
-		)
-	case envProd:
-		log = slog.New(
-			slog.NewJSONHandler(os.Stdout, &slog.HandlerOptions{Level: slog.LevelInfo}),
-		)
-	}
-	return log
 }

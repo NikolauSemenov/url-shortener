@@ -1,9 +1,9 @@
 package v1
 
 import (
-	"log/slog"
 	"net/http"
 	mwLogger "url-shortener/internal/http-server/middleware/logger"
+	"url-shortener/internal/ports"
 
 	_ "url-shortener/docs"
 
@@ -18,7 +18,7 @@ type Handlers interface {
 	RedirectHandler() http.HandlerFunc
 }
 
-func RegisterRoutes(log *slog.Logger, router *chi.Mux, handlers Handlers) {
+func RegisterRoutes(log ports.Logger, router *chi.Mux, handlers Handlers) {
 	router.Use(middleware.RequestID)
 	router.Use(middleware.Logger)
 	router.Use(mwLogger.New(log))
